@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DeepSeek Harness</title>
+  <style>
+    :root { color-scheme: light dark; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      display: grid;
+      place-items: center;
+      background: Canvas;
+      color: CanvasText;
+      font: 14px/1.6 "Segoe UI", system-ui, sans-serif;
+    }
+    main { text-align: center; }
+    h1 { margin: 0 0 6px; font-size: 20px; font-weight: 600; }
+    p { margin: 0; opacity: .65; }
+    .bar {
+      width: 132px;
+      height: 3px;
+      margin: 20px auto 0;
+      overflow: hidden;
+      border-radius: 2px;
+      background: color-mix(in srgb, CanvasText 14%, transparent);
+    }
+    .bar::after {
+      content: "";
+      display: block;
+      width: 45%;
+      height: 100%;
+      border-radius: inherit;
+      background: color-mix(in srgb, CanvasText 55%, transparent);
+      animation: slide 1.2s ease-in-out infinite;
+    }
+    @keyframes slide {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(320%); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .bar::after { animation: none; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>DeepSeek Harness</h1>
+    <p>Starting the local runtime…</p>
+    <div class="bar" role="progressbar" aria-label="Starting"></div>
+  </main>
+</body>
+</html>

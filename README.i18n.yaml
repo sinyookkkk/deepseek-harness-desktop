@@ -1,0 +1,34 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write apps/desktop-tauri/README.md
+/:
+  en: 2e78924f901f76f8
+  zh: 6b1b44c9e9c406fd
+/deepseek-harness-tauri-shell:
+  en: a2da76975a0b6997
+  zh: 6632e6ea69a1815b
+/deepseek-harness-tauri-shell/summary:
+  en: 17ec277fcfa98d5a
+  zh: 3ae8934aceb98ba7
+/deepseek-harness-tauri-shell/build:
+  en: 049feff492a21f4b
+  zh: bcc3f280d3d80bea
+/deepseek-harness-tauri-shell/install:
+  en: fa84dfa8c478cccd
+  zh: 59b29faabcb0bf70
+/deepseek-harness-tauri-shell/runtime-selection-and-import:
+  en: 87da902c74a8b1fc
+  zh: 58c8633fce59ceeb
+/deepseek-harness-tauri-shell/toolchain-pinning:
+  en: b4e691cbdd43f208
+  zh: 9f89274bf10525d3
+/deepseek-harness-tauri-shell/configuration:
+  en: b074f75f2732d399
+  zh: c2676a8b3c8d5900
+/deepseek-harness-tauri-shell/known-limitations:
+  en: a408cc25c70590b7
+  zh: 00d399bf4cd72ac5
+/deepseek-harness-tauri-shell/measurements:
+  en: 3300eecbb3b5bbda
+  zh: 45aaadcc737e88d2
