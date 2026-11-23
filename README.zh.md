@@ -77,3 +77,7 @@ workspace = 'C:\Users\you'
 - 运行时更新载荷：`dsh.exe` 141.1 MB（147,907,584 字节）加 `dsh-rg.exe` 5.2 MB（5,429,760 字节）；导入会把两者复制到 `runtimes/<version>/`。
 - 种子运行时：来自 PyPI 的 0.2.2-rc.2；`--version` 输出 `0.2.2-rc.2`，URL 行为 `dsh web: http://127.0.0.1:<port>/?token=<token>`。
 - 代理 shell PATH 检查：在没有系统 Node 的 `PATH` 下，`node --version`、`npm --version`、`npx --version`、`pnpm --version` 都能从内置目录解析；不需要安装器写入用户 PATH。
+
+## 许可证
+
+MIT，见 [LICENSE](LICENSE)。

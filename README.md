@@ -77,3 +77,7 @@ workspace = 'C:\Users\you'
 - Runtime update payload: 141.1 MB (`dsh.exe`, 147,907,584 bytes) plus 5.2 MB (`dsh-rg.exe`, 5,429,760 bytes); an import copies both into `runtimes/<version>/`.
 - Seed runtime: 0.2.2-rc.2 from PyPI; `--version` prints `0.2.2-rc.2` and the URL line is `dsh web: http://127.0.0.1:<port>/?token=<token>`.
 - Agent-shell PATH spike: `node --version`, `npm --version`, `npx --version`, and `pnpm --version` resolve from the bundled directories with no system Node on `PATH`; no installer-managed user PATH entry is needed.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
