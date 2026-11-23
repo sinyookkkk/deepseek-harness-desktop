@@ -27,6 +27,8 @@ NSIS 安装包写入应用目录下的 `target/release/bundle/nsis/`。生成的
 
 ## 安装
 
+预编译安装包发布在 [Releases 页面](https://github.com/sinyookkkk/deepseek-harness-desktop/releases)。只有在需要自行生成安装包或刷新种子运行时时才需要从源码构建。
+
 按用户安装（`currentUser` 模式）不需要提权，并注册卸载项。安装包包含种子运行时以及 Node、npm、npx、pnpm 工具链。WebView2 bootstrapper 会在系统尚无 WebView2 时下载运行时。
 
 卸载会删除已安装的应用及其内置资源。`$DSH_HOME` 不属于安装内容，保持不变。

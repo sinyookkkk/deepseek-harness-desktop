@@ -27,6 +27,8 @@ The NSIS installer is written under `target/release/bundle/nsis/` in the applica
 
 ## Install
 
+Prebuilt installers are published on the [Releases page](https://github.com/sinyookkkk/deepseek-harness-desktop/releases). Building from source is only needed to produce your own installer or to refresh the seed runtime.
+
 The per-user installer (`currentUser` mode) requires no elevation and registers an uninstall entry. It bundles the seed runtime and the Node, npm, npx, and pnpm toolchain. The WebView2 bootstrapper downloads the runtime on a machine that does not already have WebView2.
 
 Uninstalling removes the installed application and its bundled resources. `$DSH_HOME` is not part of the installation and remains intact.
