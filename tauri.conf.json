@@ -27,6 +27,15 @@
       "nsis": {
         "installMode": "currentUser",
         "installerIcon": "icons/icon.ico"
+      },
+      "signCommand": {
+        "cmd": "pwsh",
+        "args": [
+          "-NoProfile",
+          "-File",
+          "scripts/sign-cloud.ps1",
+          "%1"
+        ]
       }
     }
   }

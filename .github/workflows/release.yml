@@ -8,12 +8,27 @@ on:
 permissions:
   contents: write
 
+env:
+  # Public release asset holding the seed runtime built from the harness
+  # commit that contains the packaged directory-picker fix.
+  DSH_DESKTOP_RUNTIME_RELEASE: runtime-v0.2.3-alpha.2
+
 jobs:
   build-installer:
     runs-on: windows-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Download pinned runtime
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          New-Item -ItemType Directory -Force -Path dist-exe | Out-Null
+          gh release download "$env:DSH_DESKTOP_RUNTIME_RELEASE" --repo "$env:GITHUB_REPOSITORY" --dir dist-exe --pattern "deepseek-harness-sdk-runtime-win-x64*.exe"
+          if (-not (Test-Path -LiteralPath 'dist-exe\deepseek-harness-sdk-runtime-win-x64.exe' -PathType Leaf)) { throw 'Pinned runtime executable is missing.' }
+          if (-not (Test-Path -LiteralPath 'dist-exe\deepseek-harness-sdk-runtime-win-x64-rg.exe' -PathType Leaf)) { throw 'Pinned runtime sidecar is missing.' }
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -24,9 +39,32 @@ jobs:
       - name: Install Tauri CLI
         run: cargo install tauri-cli --version "^2" --locked
 
+      # Signing stays optional. Add the Azure secrets/variables and set
+      # DSH_DESKTOP_REQUIRE_SIGNING to 1 to enable signed releases.
       - name: Build NSIS installer
         shell: pwsh
+        env:
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TRUSTED_SIGNING_ENDPOINT: ${{ vars.AZURE_TRUSTED_SIGNING_ENDPOINT }}
+          AZURE_TRUSTED_SIGNING_ACCOUNT: ${{ vars.AZURE_TRUSTED_SIGNING_ACCOUNT }}
+          AZURE_TRUSTED_SIGNING_PROFILE: ${{ vars.AZURE_TRUSTED_SIGNING_PROFILE }}
+          DSH_DESKTOP_REQUIRE_SIGNING: '0'
         run: ./scripts/build-installer.ps1
+
+      - name: Report signatures
+        shell: pwsh
+        run: |
+          $files = @()
+          $app = 'target\release\dsh-desktop-tauri.exe'
+          if (-not (Test-Path -LiteralPath $app -PathType Leaf)) { throw "Missing $app" }
+          $files += $app
+          $files += @(Get-ChildItem 'target\release\bundle\nsis\*.exe' | ForEach-Object { $_.FullName })
+          foreach ($file in $files) {
+            $signature = Get-AuthenticodeSignature -LiteralPath $file
+            Write-Host "$file -> $($signature.Status)"
+          }
 
       - name: Normalize installer filename
         shell: pwsh

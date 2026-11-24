@@ -23,7 +23,27 @@ The script prepares the bundled payloads and then runs `cargo tauri build`:
 - `prepare-runtime.ps1` uses `dist-exe/deepseek-harness-sdk-runtime-win-x64.exe` when that local build exists. Otherwise it downloads the latest public PyPI `deepseek-harness-runtime-bin` win_amd64 wheel, verifies the SHA-256 digest published by PyPI, and extracts `deepseek-harness-sdk-runtime-win-x64.exe` with its `-rg.exe` sidecar into `resources/runtime/`. Set `DSH_DESKTOP_RUNTIME_VERSION` to pin a published version.
 - `prepare-node.ps1` downloads Node 24.22.3 win-x64, verifies it against the published `SHASUMS256.txt`, downloads pnpm 11.28.5, verifies its npm registry SHA-512 integrity, and creates the `pnpm.cmd` shim in `resources/pnpm/`.
 
+The release workflow downloads the pinned runtime release asset `runtime-v0.2.3-alpha.2` into `dist-exe/` before building, so release installers carry that runtime; local builds keep the local `dist-exe` or PyPI fallback.
+
 The NSIS installer is written under `target/release/bundle/nsis/` in the application directory. Generated payloads, `target/`, and installer output are not committed.
+
+## Code signing
+
+The installer is unsigned by default. CI can sign with Azure Trusted Signing when the credentials below are configured: `scripts/sign-cloud.ps1` is the Tauri `signCommand` for the app binary and installer; it skips NSIS plugin DLLs, and the bundled runtime executable stays unsigned. Without credentials, CI and local builds produce an unsigned installer. To require signatures on a release, add the credentials and set `DSH_DESKTOP_REQUIRE_SIGNING` to `1` in `.github/workflows/release.yml`.
+
+Set these repository secrets:
+
+- `AZURE_TENANT_ID`
+- `AZURE_CLIENT_ID`
+- `AZURE_CLIENT_SECRET`
+
+Set these repository variables:
+
+- `AZURE_TRUSTED_SIGNING_ENDPOINT`, for example `https://weu.codesigning.azure.net`
+- `AZURE_TRUSTED_SIGNING_ACCOUNT`
+- `AZURE_TRUSTED_SIGNING_PROFILE`
+
+The service principal needs the Trusted Signing Certificate Profile Signer role on the Trusted Signing account. The account needs completed identity validation and a Public Trust certificate profile. When enabling signing, add `cargo install trusted-signing-cli --locked` to the workflow; a signed local build installs it the same way and sets the same environment variables.
 
 ## Install
 
@@ -62,7 +82,7 @@ workspace = 'C:\Users\you'
 
 ## Known limitations
 
-- Windows x64 only; the shell is unsigned and intended for self use.
+- Windows x64 only; the shell is unsigned unless Azure Trusted Signing credentials are configured, and is intended for self use.
 - There is no automatic update feed, tray icon, account login, or multi-instance management. Import Runtime is the v1 runtime update mechanism.
 - Restarting interrupts a running turn. Session logs stay durable, but the in-flight turn may be lost.
 - The PyPI seed wheel can lag the current release; use Import Runtime for a locally built runtime.
@@ -71,11 +91,11 @@ workspace = 'C:\Users\you'
 
 ## Measurements
 
-- Installer: 96.0 MB (`DeepSeek Harness_0.2.3-alpha.2_x64-setup.exe`, 100,622,691 bytes).
+- Installer (0.2.3-alpha.2): 96.0 MB (`DeepSeek Harness_0.2.3-alpha.2_x64-setup.exe`, 100,622,691 bytes).
 - Installed footprint: 246.0 MB (257,930,686 bytes).
 
-- Runtime update payload: 141.1 MB (`dsh.exe`, 147,907,584 bytes) plus 5.2 MB (`dsh-rg.exe`, 5,429,760 bytes); an import copies both into `runtimes/<version>/`.
-- Seed runtime: 0.2.2-rc.2 from PyPI; `--version` prints `0.2.2-rc.2` and the URL line is `dsh web: http://127.0.0.1:<port>/?token=<token>`.
+- Runtime update payload: 142.6 MB (`dsh.exe`, 149,534,720 bytes) plus 5.2 MB (`dsh-rg.exe`, 5,429,760 bytes); an import copies both into `runtimes/<version>/`.
+- Seed runtime: 0.2.3-alpha.2 from the `runtime-v0.2.3-alpha.2` release asset; `--version` prints `0.2.3-alpha.2` and the URL line is `dsh web: http://127.0.0.1:<port>/?token=<token>`.
 - Agent-shell PATH spike: `node --version`, `npm --version`, `npx --version`, and `pnpm --version` resolve from the bundled directories with no system Node on `PATH`; no installer-managed user PATH entry is needed.
 
 ## License

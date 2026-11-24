@@ -1,6 +1,6 @@
 [package]
 name = "dsh-desktop-tauri"
-version = "0.2.3-alpha.2"
+version = "0.2.3-alpha.3"
 description = "Self-contained Tauri desktop shell for the DeepSeek Harness Web UI"
 edition = "2024"
 license = "MIT"

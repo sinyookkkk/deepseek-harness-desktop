@@ -23,7 +23,27 @@ pwsh scripts/build-installer.ps1
 - `prepare-runtime.ps1` 优先使用 `dist-exe/deepseek-harness-sdk-runtime-win-x64.exe`。该本地构建不存在时，它下载公开 PyPI 上最新的 `deepseek-harness-runtime-bin` win_amd64 wheel，校验 PyPI 发布的 SHA-256，并把 `deepseek-harness-sdk-runtime-win-x64.exe` 及其 `-rg.exe` sidecar 解压到 `resources/runtime/`。可用 `DSH_DESKTOP_RUNTIME_VERSION` 固定已发布的版本。
 - `prepare-node.ps1` 下载 Node 24.22.3 win-x64，按发布的 `SHASUMS256.txt` 校验；下载 pnpm 11.28.5，校验 npm registry 的 SHA-512 integrity；然后在 `resources/pnpm/` 中创建 `pnpm.cmd` shim。
 
+release workflow 在构建前把固定的 runtime release asset `runtime-v0.2.3-alpha.2` 下载到 `dist-exe/`，因此发布安装包携带该 runtime；本地构建仍使用本地 `dist-exe` 或 PyPI 回退。
+
 NSIS 安装包写入应用目录下的 `target/release/bundle/nsis/`。生成的载荷、`target/` 和安装包输出不提交。
+
+## 代码签名
+
+默认情况下安装包不签名。配置下面的凭据后，CI 可用 Azure Trusted Signing 签名：`scripts/sign-cloud.ps1` 作为 Tauri `signCommand` 签应用二进制和安装包；脚本会跳过 NSIS 插件 DLL，内置 runtime 可执行文件保持未签名。没有凭据时，CI 和本地构建都会产出未签名安装包。要在发布时强制签名，添加凭据并把 `.github/workflows/release.yml` 中的 `DSH_DESKTOP_REQUIRE_SIGNING` 设为 `1`。
+
+设置这些仓库 Secrets：
+
+- `AZURE_TENANT_ID`
+- `AZURE_CLIENT_ID`
+- `AZURE_CLIENT_SECRET`
+
+设置这些仓库 Variables：
+
+- `AZURE_TRUSTED_SIGNING_ENDPOINT`，例如 `https://weu.codesigning.azure.net`
+- `AZURE_TRUSTED_SIGNING_ACCOUNT`
+- `AZURE_TRUSTED_SIGNING_PROFILE`
+
+服务主体需要在 Trusted Signing 账号上拥有 Trusted Signing Certificate Profile Signer 角色。账号需要完成身份验证并创建 Public Trust 证书 profile。启用签名时，在 workflow 中加入 `cargo install trusted-signing-cli --locked`；本地签名构建也用同样方式安装并设置相同环境变量。
 
 ## 安装
 
@@ -62,7 +82,7 @@ workspace = 'C:\Users\you'
 
 ## 已知限制
 
-- 仅支持 Windows x64；外壳未签名，面向自用。
+- 仅支持 Windows x64；未配置 Azure Trusted Signing 凭据时外壳不签名，面向自用。
 - 没有自动更新源、托盘图标、账号登录或多实例管理。Import Runtime 是 v1 的运行时更新机制。
 - 重启会中断正在执行的回合。会话日志仍然持久，但进行中的回合可能丢失。
 - PyPI 种子 wheel 可能落后于当前发布；本地构建的运行时请使用 Import Runtime。
@@ -71,11 +91,11 @@ workspace = 'C:\Users\you'
 
 ## 实测数据
 
-- 安装包：96.0 MB（`DeepSeek Harness_0.2.3-alpha.2_x64-setup.exe`，100,622,691 字节）。
+- 安装包（0.2.3-alpha.2）：96.0 MB（`DeepSeek Harness_0.2.3-alpha.2_x64-setup.exe`，100,622,691 字节）。
 - 安装后占用：246.0 MB（257,930,686 字节）。
 
-- 运行时更新载荷：`dsh.exe` 141.1 MB（147,907,584 字节）加 `dsh-rg.exe` 5.2 MB（5,429,760 字节）；导入会把两者复制到 `runtimes/<version>/`。
-- 种子运行时：来自 PyPI 的 0.2.2-rc.2；`--version` 输出 `0.2.2-rc.2`，URL 行为 `dsh web: http://127.0.0.1:<port>/?token=<token>`。
+- 运行时更新载荷：`dsh.exe` 142.6 MB（149,534,720 字节）加 `dsh-rg.exe` 5.2 MB（5,429,760 字节）；导入会把两者复制到 `runtimes/<version>/`。
+- 种子运行时：来自 `runtime-v0.2.3-alpha.2` release asset 的 0.2.3-alpha.2；`--version` 输出 `0.2.3-alpha.2`，URL 行为 `dsh web: http://127.0.0.1:<port>/?token=<token>`。
 - 代理 shell PATH 检查：在没有系统 Node 的 `PATH` 下，`node --version`、`npm --version`、`npx --version`、`pnpm --version` 都能从内置目录解析；不需要安装器写入用户 PATH。
 
 ## 许可证
