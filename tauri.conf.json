@@ -17,8 +17,8 @@
     "icon": ["icons/icon.ico"],
     "resources": [
       "resources/runtime/*",
-      "resources/node/*",
-      "resources/pnpm/*"
+      "resources/node",
+      "resources/pnpm"
     ],
     "windows": {
       "webviewInstallMode": {
