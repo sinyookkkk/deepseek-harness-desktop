@@ -23,7 +23,9 @@ The script prepares the bundled payloads and then runs `cargo tauri build`:
 - `prepare-runtime.ps1` uses `dist-exe/deepseek-harness-sdk-runtime-win-x64.exe` when that local build exists. Otherwise it downloads the latest public PyPI `deepseek-harness-runtime-bin` win_amd64 wheel, verifies the SHA-256 digest published by PyPI, and extracts `deepseek-harness-sdk-runtime-win-x64.exe` with its `-rg.exe` sidecar into `resources/runtime/`. Set `DSH_DESKTOP_RUNTIME_VERSION` to pin a published version.
 - `prepare-node.ps1` downloads Node 24.22.3 win-x64, verifies it against the published `SHASUMS256.txt`, downloads pnpm 11.28.5, verifies its npm registry SHA-512 integrity, and creates the `pnpm.cmd` shim in `resources/pnpm/`.
 
-The release workflow downloads the pinned runtime release asset `runtime-v0.2.3-alpha.2` into `dist-exe/` before building, so release installers carry that runtime; local builds keep the local `dist-exe` or PyPI fallback.
+The release workflow downloads the pinned runtime release asset `runtime-v0.2.3-alpha.2` into `dist-exe/` before building, so release installers carry that runtime; local builds keep the local `dist-exe` or PyPI fallback. That asset must be the build containing the plugin-market Worker path fix: a single-file runtime cannot start `@deepseek-ai/dsh-plugin-market`'s Worker from a `file:` URL, so its `parse-thread` entry passes a filesystem path and normalizes the pkg snapshot drive.
+
+To refresh an existing installation after rebuilding `dist-exe/`, close the app and run `pwsh scripts/update-installed-runtime.ps1`. The script replaces the seed and the recorded runtime when both carry the same version; replacing only `resources/runtime/` leaves an existing installation on its recorded runtime.
 
 The NSIS installer is written under `target/release/bundle/nsis/` in the application directory. Generated payloads, `target/`, and installer output are not committed.
 
@@ -94,7 +96,7 @@ workspace = 'C:\Users\you'
 - Installer (0.2.3-alpha.2): 96.0 MB (`DeepSeek Harness_0.2.3-alpha.2_x64-setup.exe`, 100,622,691 bytes).
 - Installed footprint: 246.0 MB (257,930,686 bytes).
 
-- Runtime update payload: 142.6 MB (`dsh.exe`, 149,534,720 bytes) plus 5.2 MB (`dsh-rg.exe`, 5,429,760 bytes); an import copies both into `runtimes/<version>/`.
+- Runtime update payload: 142.6 MB (`dsh.exe`, 149,535,232 bytes) plus 5.2 MB (`dsh-rg.exe`, 5,429,760 bytes); an import copies both into `runtimes/<version>/`.
 - Seed runtime: 0.2.3-alpha.2 from the `runtime-v0.2.3-alpha.2` release asset; `--version` prints `0.2.3-alpha.2` and the URL line is `dsh web: http://127.0.0.1:<port>/?token=<token>`.
 - Agent-shell PATH spike: `node --version`, `npm --version`, `npx --version`, and `pnpm --version` resolve from the bundled directories with no system Node on `PATH`; no installer-managed user PATH entry is needed.
 

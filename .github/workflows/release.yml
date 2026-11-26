@@ -26,6 +26,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           New-Item -ItemType Directory -Force -Path dist-exe | Out-Null
+          # This asset must be the build containing the plugin-market Worker path
+          # fix; verify-runtime-closure and the runtime tests run in the harness
+          # repository, not here.
           gh release download "$env:DSH_DESKTOP_RUNTIME_RELEASE" --repo "$env:GITHUB_REPOSITORY" --dir dist-exe --pattern "deepseek-harness-sdk-runtime-win-x64*.exe"
           if (-not (Test-Path -LiteralPath 'dist-exe\deepseek-harness-sdk-runtime-win-x64.exe' -PathType Leaf)) { throw 'Pinned runtime executable is missing.' }
           if (-not (Test-Path -LiteralPath 'dist-exe\deepseek-harness-sdk-runtime-win-x64-rg.exe' -PathType Leaf)) { throw 'Pinned runtime sidecar is missing.' }

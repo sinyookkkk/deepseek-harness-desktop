@@ -1,3 +1,11 @@
 /target/
 /resources/
 /gen/
+/dist-exe/
+
+# Local analysis scratch: session dumps, probe scripts, logs
+/.dsh-analysis/
+/probe.mjs
+
+# Local specpowers workflow state and gate markers
+/.superpowers/
