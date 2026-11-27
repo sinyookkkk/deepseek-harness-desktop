@@ -25,6 +25,8 @@ pwsh scripts/build-installer.ps1
 
 release workflow 在构建前把固定的 runtime release asset `runtime-v0.2.3-alpha.2` 下载到 `dist-exe/`，因此发布安装包携带该 runtime；本地构建仍使用本地 `dist-exe` 或 PyPI 回退。该 asset 必须是包含 plugin-market Worker 路径修复的构建：单文件 runtime 无法从 `file:` URL 启动 `@deepseek-ai/dsh-plugin-market` 的 Worker，因此其 `parse-thread` 入口改为传文件系统路径，并规范化 pkg 快照盘符。
 
+2026-11-27 该资产已按 harness 源码重新构建并重新上传，标签与版本串不变，因此 pin 继续有效：`deepseek-harness-sdk-runtime-win-x64.exe` 现为 `sha256 c031d8b2a278f00cc0711fe20805d3ce8e390e0902d6e6f2070f286c62585c89`（149,551,104 字节）。新增盘符拼写修复：URL 拼法的 Windows 路径（如 `/E:/repo/x`，聊天链接与 Markdown 目标使用的形式）现在解析为 `E:/repo/x`，不再解析为不存在的 `C:\E:\repo\x`，文件链接与图片目标因此恢复正常。`-rg.exe` sidecar 与上次上传逐字节相同。
+
 重新构建 `dist-exe/` 后要刷新已安装的应用，请先关闭应用，再运行 `pwsh scripts/update-installed-runtime.ps1`。脚本会在版本相同时同时替换种子运行时和已记录的运行时；只替换 `resources/runtime/` 不会影响已安装应用的运行时选择。
 
 NSIS 安装包写入应用目录下的 `target/release/bundle/nsis/`。生成的载荷、`target/` 和安装包输出不提交。

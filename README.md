@@ -25,6 +25,8 @@ The script prepares the bundled payloads and then runs `cargo tauri build`:
 
 The release workflow downloads the pinned runtime release asset `runtime-v0.2.3-alpha.2` into `dist-exe/` before building, so release installers carry that runtime; local builds keep the local `dist-exe` or PyPI fallback. That asset must be the build containing the plugin-market Worker path fix: a single-file runtime cannot start `@deepseek-ai/dsh-plugin-market`'s Worker from a `file:` URL, so its `parse-thread` entry passes a filesystem path and normalizes the pkg snapshot drive.
 
+On 2026-11-27 that asset was rebuilt from the harness sources and re-uploaded under the same tag and version string, so the pin still resolves: `deepseek-harness-sdk-runtime-win-x64.exe` is now `sha256 c031d8b2a278f00cc0711fe20805d3ce8e390e0902d6e6f2070f286c62585c89` (149,551,104 bytes). It adds the drive-spelling fix: a URL-spelled Windows path such as `/E:/repo/x` (the form chat links and Markdown destinations use) now resolves to `E:/repo/x` instead of the nonexistent `C:\E:\repo\x`, so file links and image destinations open again. The `-rg.exe` sidecar is byte-identical to the previous upload.
+
 To refresh an existing installation after rebuilding `dist-exe/`, close the app and run `pwsh scripts/update-installed-runtime.ps1`. The script replaces the seed and the recorded runtime when both carry the same version; replacing only `resources/runtime/` leaves an existing installation on its recorded runtime.
 
 The NSIS installer is written under `target/release/bundle/nsis/` in the application directory. Generated payloads, `target/`, and installer output are not committed.
